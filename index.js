@@ -41,3 +41,5 @@ async function putObjectToS3(s3BucketName,obj) {
         console.log('error on s3 write : ',err)
     }
 }
+
+exports.putObjectToS3 = putObjectToS3
