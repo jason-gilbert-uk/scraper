@@ -35,7 +35,7 @@ async function putObjectToS3(s3BucketName,obj) {
     }
     try {
         var result = await s3.putObject(params).promise();
-        return result;
+        return {bucket: s3BucketName,file: fileName};
 
     } catch (err) {
         console.log('error on s3 write : ',err)
