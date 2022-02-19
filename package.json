@@ -1,6 +1,6 @@
 {
   "name": "@jasongilbertuk/scraper",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/jason-gilbert-uk/scraper#readme",
   "dependencies": {
+    "@jasongilbertuk/demo25lib": "^1.0.12",
     "axios": "^0.26.0",
     "cheerio": "^1.0.0-rc.10"
   }
