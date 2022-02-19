@@ -1,45 +1,268 @@
-const AWS = require('aws-sdk')
+const helloWorld = require('@jasongilbertuk/demo25lib').helloWorld;
+const writeObjectToS3 = require('@jasongilbertuk/demo25lib').writeObjectToS3;
+const generateDateTimeFileName = require('@jasongilbertuk/demo25lib').generateDateTimeFileName;
+const resetConfig = require('@jasongilbertuk/demo25lib').resetConfig;
+const readConfig = require('@jasongilbertuk/demo25lib').readConfig;
+const writeObjectToSQS = require('@jasongilbertuk/demo25lib').writeObjectToSQS;
+const readObjectFromSQS = require('@jasongilbertuk/demo25lib').readObjectFromSQS;
+const readItemFromDB = require('@jasongilbertuk/demo25lib').readItemFromDB;
+const writeItemToDB = require('@jasongilbertuk/demo25lib').writeItemToDB;
 
-function getDateTimeFileName() {
-    const date = new Date();
-    const year = date.getFullYear() * 1e4; // 1e4 gives us the the other digits to be filled later, so 20210000.
-    const month = (date.getMonth() + 1) * 100; // months are numbered 0-11 in JavaScript, * 100 to move two digits to the left. 20210011 => 20211100
-    const day = date.getDate(); // 20211100 => 20211124
-    const result = year + month + day + '' // `+ ''` to convert to string from number, 20211124 => "20211124"
 
-    var hours = date.getHours()
-    var minutes = date.getMinutes()
-    var seconds = date.getSeconds();
-    if (hours < 10) {
-        hours = "0"+hours;
-    }
-    if (minutes < 10) {
-        minutes = "0"+minutes
-    }
-    if (seconds < 10) {
-        seconds = "0"+seconds
-    }
+const axios = require('axios')
+const cheerio = require('cheerio')
 
-    var nameOfFile = result +"-"+hours+minutes+seconds+".json";
-    return nameOfFile;
+var g_config=[];
+var g_indexToProcess = 0;
+var articles = [];
+const PROMOTION_TYPE = {
+    NONE: 0,
+    MEAL_DEAL: 1,
+    ANY_X_FOR_Y: 2,
+    PER_KG: 3,
+    MEAL_DEAL: 4,
+    CHEAPEST_FREE: 5,
+    CLUBCARD_PRICE: 6
 }
 
-async function putObjectToS3(s3BucketName,obj) {
-    const fileName = getDateTimeFileName();
-    
-    var s3 = new AWS.S3();
-    var params = {
-        Bucket : s3BucketName,
-        Key : fileName,
-        Body : JSON.stringify(obj)
+function getConfigIndexToProcess() {
+    var indexFound = false;
+    var index = 0;
+    var foundIndex = 0;
+    while (!indexFound && index < g_config.length) {
+        if (g_config[index].state == 'processing') {
+            indexFound = true;
+            g_indexToProcess= index;
+        } else {
+            index++;
+        }
     }
+    if (!indexFound)  {
+        index = 0;
+        while (!indexFound && index < g_config.length) {
+            if (g_config[index].state == 'ready') {
+                indexFound = true;
+                g_indexToProcess = index;
+            } else {
+                index++;
+            }
+        }
+    }
+    return indexFound;
+}
+function sleepWithDelay(delay) {
+    console.log('*** sleeping for a period of ',delay," milliseconds")
+    var start = new Date().getTime();
+    while (new Date().getTime() < start + delay);
+}
+
+function randomSleep(lowerms,upperms) {
+    const delay =  Math.floor(Math.random() * (upperms - lowerms + 1) + lowerms)
+    sleepWithDelay(delay);
+}
+
+async function processNextEntry() {
+    var url = ""
+    if (g_config[g_indexToProcess].state == 'ready') {
+        url = g_config[g_indexToProcess].url;
+        g_config[g_indexToProcess].state = "processing"
+    } else {
+        url = g_config[g_indexToProcess].nextInChain;
+    }
+    randomSleep(500,1000);
+    console.log('*** timer complete processing request for url ',url)
     try {
-        var result = await s3.putObject(params).promise();
-        return {bucket: s3BucketName,file: fileName};
+        console.log('axios about to be called. url = ',url)
+        var response = await axios.get(url);
+    }
+    catch (error) {
+        console.log('*** received an error requesting url ',url);
+        console.log(error);
+        var trimmedURL = url.slice(21,url.length);
+        return;
+    }
+    
+    try {
+        const html = response.data;
+        const $ = cheerio.load(html)
+        $('.product-list--list-item',html).each(function(){
+            var isAvailable = true;
+            var title = $(this).find('h3').text()
+            var urlsub = $(this).find('a').attr('href');
+            var url = "https://www.tesco.com" + urlsub;
+            var productId = url.substr(url.lastIndexOf('/') + 1);
+            var imageUrl
+            var price =  parseFloat("0.00").toFixed(2);
+            var AldiPriceMatch = false;
+            var hasPromotion = false;
+            var ProductPromotionText = ''
+            var ProductPromotionDate = ''
+            var ProductPromotionStart = ''
+            var ProductPromotionEnd = ''
+            var clubcardPrice = price;
+            var purchaseNumber
+            var purchasePrice
+            var promotionType = PROMOTION_TYPE.NONE;
+
+            const imageBlock = $(this).find('.product-image__container')
+            imageUrl = $(imageBlock.find('img')).attr('src');
+            
+            const unavailableText = $(this).find('.unavailable-messages').text();
+            if (unavailableText != "") {
+                isAvailable = false;
+                var article = {
+                    "productId": productId,
+                    "title": title,
+                    "url" : url,
+                    "imageUrl" : imageUrl,
+                    "isAvailable" : isAvailable,
+                    "price": price,
+                    "aldiPriceMatch" : AldiPriceMatch,
+                    "hasPromotion": hasPromotion,
+                    "promotionType": promotionType,
+                    "productPromotionText": ProductPromotionText,
+                    "productPromotionDate": ProductPromotionDate,
+                    "productPromotionStart": ProductPromotionStart,
+                    "productPromotionEnd" : ProductPromotionEnd,
+                    "clubcardPrice": clubcardPrice};
+                articles.push(article);
+                return true;            //skip to next item in each itteration.
+            } 
+
+            const priceEntry = $(this).find('.price-per-sellable-unit--price')
+            const textprice = $(priceEntry).find('.value').text()
+            price = parseFloat(textprice).toFixed(2);
+            clubcardPrice = price;
+            const ProductInfoMessages= $(this).find('.product-info-message-list');
+            const ProductInfoMessage =$(ProductInfoMessages).find('.product-info-message');
+            const AldiPriceMatchMessage = $(ProductInfoMessage).find('p').text();
+            if (AldiPriceMatchMessage === "Aldi Price MatchAldi Price Match") {
+                AldiPriceMatch = true;
+            }
+            ProductPromotionText = $(this).find('.offer-text').text();
+            ProductPromotionDate = $(this).find('.dates').text();
+            ProductPromotionText = ProductPromotionText.slice(0,ProductPromotionText.length/2);
+            ProductPromotionDate = ProductPromotionDate.slice(0,ProductPromotionDate.length/2);
+            var showDeal = true;
+            var temp = ProductPromotionText.indexOf("Cheapest Product Free");
+            if (temp == -1)
+            {
+                temp = ProductPromotionText.indexOf("per kg Clubcard Price")
+                if (temp == -1) {
+                    temp = ProductPromotionText.indexOf("Meal Deal");
+                    if (temp == -1){
+                        temp = ProductPromotionText.indexOf("Any ");
+                        if (temp == -1)
+                        {
+                            temp = ProductPromotionText.indexOf("Clubcard Price");
+                            if (temp == -1) {
+                                promotionType = PROMOTION_TYPE.NONE;
+                                clubcardPrice = price;
+                            } else if (temp==4) {
+                                promotionType = PROMOTION_TYPE.CLUBCARD_PRICE;
+                                clubcardPrice = parseFloat("0."+ ProductPromotionText.slice(0,2)).toFixed(2);
+                            }else {
+                                promotionType = PROMOTION_TYPE.CLUBCARD_PRICE;
+                                clubcardPrice = parseFloat(ProductPromotionText.slice(1,temp-1)).toFixed(2);
+                            }
+                        } else {
+                            promotionType = PROMOTION_TYPE.ANY_X_FOR_Y;
+                            clubcardPrice = price;
+                            temp = ProductPromotionText.indexOf("Clubcard Price");
+                            purchaseNumber = ProductPromotionText.substring(4,5);
+                            purchasePrice = ProductPromotionText.slice(11,temp-1);
+                            clubcardPrice = (parseFloat(purchasePrice) / parseFloat(purchaseNumber)).toFixed(2);
+                        }
+                    } else {
+                        promotionType = PROMOTION_TYPE.MEAL_DEAL
+                        clubcardPrice = price;
+                        showDeal = false;
+                    }
+                }
+                else
+                {
+                    promotionType = PROMOTION_TYPE.PER_KG;
+                    clubcardPrice = price;
+                    showDeal = false;
+                }
+            } else {
+                //Todo Any 3 for 2 Clubcard Price - Cheapest Product Free - Selected Vegetables 80g - 800g
+                promotionType = PROMOTION_TYPE.CHEAPEST_FREE;
+                clubcardPrice = price;
+                showDeal = false;
+            }
+
+            if (ProductPromotionDate != '') {
+                ProductPromotionStart = ProductPromotionDate.slice(30,40);
+                ProductPromotionEnd = ProductPromotionDate.slice(46,57);
+                //Offer valid for delivery from 03/01/2022 until 08/02/2022
+            }
+
+            var article = {
+                "productId": productId,
+                "title": title,
+                "url" : url,
+                "imageUrl" : imageUrl,
+                "isAvaialble" : isAvailable,
+                "price": price,
+                "aldiPriceMatch" : AldiPriceMatch,
+                "hasPromotion": hasPromotion,
+                "promotionType": promotionType,
+                "productPromotionText": ProductPromotionText,
+                "productPromotionDate": ProductPromotionDate,
+                "productPromotionStart": ProductPromotionStart,
+                "productPromotionEnd" : ProductPromotionEnd,
+                "clubcardPrice": clubcardPrice};
+            articles.push(article);
+            //console.log(JSON.stringify(article)+",");
+            
+        })
+      
+        const el = $('.pagination-btn-holder').last();
+        var $el = $(el).find('a');
+        var att = $el.attr('href');
+        if (att == undefined) {
+            g_config[g_indexToProcess].state = 'finished';
+        } else {
+            g_config[g_indexToProcess].nextInChain = "https://www.tesco.com" + att;    
+        }
+
+        var item = {id: 'scrapingconfig',  config: {urls: g_config}}
+        writeItemToDB(g_dbTableName,item)
+        return;
+    } catch (err) {
+        console.log('***CATCH ERROR***')
+        console.log('***ERROR: ',err)
+    }
+}
+
+async function scraper(dbTableName,bucketName,queueName) {
+    g_dbTableName = dbTableName;
+    g_bucketName = bucketName
+    g_queueName = queueName
+
+    try {
+        var result  = await readConfig(g_dbTableName);
+        g_config = result.urls
+        
+
+        var indexFound = getConfigIndexToProcess();
+        while(indexFound) {
+            while (articles.length < 500) {
+                console.log('articles.length = ',articles.length)
+                await processNextEntry()
+                indexFound = getConfigIndexToProcess();
+            }
+            indexFound = false;
+            var fileName = generateDateTimeFileName();
+            writeObjectToS3(g_bucketName,fileName,articles);
+            indexFound = getConfigIndexToProcess();
+            articles=[];
+        }
 
     } catch (err) {
-        console.log('error on s3 write : ',err)
+        console.log('error in scrape: ',err)
     }
 }
 
-exports.putObjectToS3 = putObjectToS3
+module.exports = scraper;
