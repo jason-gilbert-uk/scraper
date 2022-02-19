@@ -256,6 +256,9 @@ async function scraper(dbTableName,bucketName,queueName) {
             indexFound = false;
             var fileName = generateDateTimeFileName();
             writeObjectToS3(g_bucketName,fileName,articles);
+            var sqsMsg = {bucket: g_bucketName,file: fileName};
+            writeObjectToSQS(g_queueName,sqsMsg);
+
             indexFound = getConfigIndexToProcess();
             articles=[];
         }
