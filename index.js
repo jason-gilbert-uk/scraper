@@ -1,12 +1,6 @@
-const helloWorld = require('@jasongilbertuk/demo25lib').helloWorld;
-const writeObjectToS3 = require('@jasongilbertuk/demo25lib').writeObjectToS3;
-const generateDateTimeFileName = require('@jasongilbertuk/demo25lib').generateDateTimeFileName;
-const resetConfig = require('@jasongilbertuk/demo25lib').resetConfig;
-const readConfig = require('@jasongilbertuk/demo25lib').readConfig;
-const writeObjectToSQS = require('@jasongilbertuk/demo25lib').writeObjectToSQS;
-const readObjectFromSQS = require('@jasongilbertuk/demo25lib').readObjectFromSQS;
-const readItemFromDB = require('@jasongilbertuk/demo25lib').readItemFromDB;
-const writeItemToDB = require('@jasongilbertuk/demo25lib').writeItemToDB;
+const {writeObjectToS3,generateDateTimeFileName} = require('@jasongilbertuk/s3-helper')
+const {readConfig} = require('@jasongilbertuk/dynamo-helper')
+const {writeObjectToSQS} = require('@jasongilbertuk/sqs-helper')
 
 
 const axios = require('axios')
