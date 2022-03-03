@@ -1,5 +1,5 @@
 const {writeObjectToS3,generateDateTimeFileName} = require('@jasongilbertuk/s3-helper')
-const {readConfig} = require('@jasongilbertuk/dynamo-helper')
+const {readConfig,writeItemToTable} = require('@jasongilbertuk/dynamo-helper')
 const {writeObjectToSQS} = require('@jasongilbertuk/sqs-helper')
 
 
@@ -222,7 +222,7 @@ async function processNextEntry() {
         }
 
         var item = {id: 'scrapingconfig',  config: {urls: g_config}}
-        writeItemToDB(g_dbTableName,item)
+        writeItemToTable(g_dbTableName,item)
         return;
     } catch (err) {
         console.log('***CATCH ERROR***')
