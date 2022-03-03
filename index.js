@@ -5,6 +5,7 @@ const {writeObjectToSQS} = require('@jasongilbertuk/sqs-helper')
 
 const axios = require('axios')
 const cheerio = require('cheerio')
+const { createSQSIfDoesntExist } = require('../demo25lib')
 
 var g_config=[];
 var g_indexToProcess = 0;
@@ -231,9 +232,15 @@ async function processNextEntry() {
 }
 
 async function scraper(dbTableName,bucketName,queueName) {
+    
     g_dbTableName = dbTableName;
     g_bucketName = bucketName
-    g_queueName = queueName
+    g_queueName = await createSQSIfDoesntExist(queueName);
+    console.log('************************')
+    console.log('************************')
+    console.log('******g_queueName******',g_queueName)
+    console.log('************************')
+    console.log('************************')
 
     try {
         var result  = await readConfig(g_dbTableName);
