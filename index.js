@@ -152,10 +152,18 @@ async function processNextEntry() {
                                 clubcardPrice = price;
                             } else if (temp==4) {
                                 promotionType = PROMOTION_TYPE.CLUBCARD_PRICE;
+                                console.log('temp=4')
+                                console.log(ProductPromotionText)
+                                console.log(ProductPromotionText.slice(0,2))
                                 clubcardPrice = parseFloat("0."+ ProductPromotionText.slice(0,2)).toFixed(2);
+                                console.log(clubcardPrice)
                             }else {
                                 promotionType = PROMOTION_TYPE.CLUBCARD_PRICE;
+                                console.log('else')
+                                console.log(ProductPromotionText)
+                                console.log(ProductPromotionText.slice(0,2))
                                 clubcardPrice = parseFloat(ProductPromotionText.slice(1,temp-1)).toFixed(2);
+                                console.log(clubcardPrice);
                             }
                         } else {
                             promotionType = PROMOTION_TYPE.ANY_X_FOR_Y;
