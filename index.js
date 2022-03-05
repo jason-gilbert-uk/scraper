@@ -1,23 +1,20 @@
 const {writeObjectToS3,generateDateTimeFileName} = require('@jasongilbertuk/s3-helper')
 const {readConfigFromControlTable,writeItemToControlTable} = require('@jasongilbertuk/control-table')
-const {writeObjectToSQS} = require('@jasongilbertuk/sqs-helper')
-
+const {createSQSIfDoesntExist,writeObjectToSQS} = require('@jasongilbertuk/sqs-helper')
 
 const axios = require('axios')
 const cheerio = require('cheerio')
-const { createSQSIfDoesntExist } = require('../demo25lib')
 
 var g_config=[];
 var g_indexToProcess = 0;
 var articles = [];
 const PROMOTION_TYPE = {
-    NONE: 0,
-    MEAL_DEAL: 1,
-    ANY_X_FOR_Y: 2,
-    PER_KG: 3,
-    MEAL_DEAL: 4,
-    CHEAPEST_FREE: 5,
-    CLUBCARD_PRICE: 6
+    NONE: "None",
+    MEAL_DEAL: "Meal Deal",
+    ANY_X_FOR_Y: "Any x for y",
+    PER_KG: "Per Kg",
+    CHEAPEST_FREE: "Cheapest Free",
+    CLUBCARD_PRICE: "Clubcard Price"
 }
 
 function getConfigIndexToProcess() {
