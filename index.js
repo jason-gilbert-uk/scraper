@@ -222,6 +222,8 @@ async function processNextEntry() {
                 //Offer valid for delivery from 03/01/2022 until 08/02/2022
             }
 
+            console.log(clubC)
+
             var article = {
                 "productId": productId,
                 "title": title,
