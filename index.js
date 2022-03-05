@@ -1,5 +1,5 @@
 const {writeObjectToS3,generateDateTimeFileName} = require('@jasongilbertuk/s3-helper')
-const {readConfig,writeItemToTable} = require('@jasongilbertuk/dynamo-helper')
+const {readConfig,writeItemToControlTable} = require('@jasongilbertuk/control-table')
 const {writeObjectToSQS} = require('@jasongilbertuk/sqs-helper')
 
 
@@ -223,7 +223,7 @@ async function processNextEntry() {
         }
 
         var item = {id: 'scrapingconfig',  config: {urls: g_config}}
-        writeItemToTable(g_dbTableName,item)
+        writeItemToControlTable(g_dbTableName,item)
         return;
     } catch (err) {
         console.log('***CATCH ERROR***')
@@ -236,16 +236,10 @@ async function scraper(dbTableName,bucketName,queueName) {
     g_dbTableName = dbTableName;
     g_bucketName = bucketName
     g_queueName = await createSQSIfDoesntExist(queueName);
-    console.log('************************')
-    console.log('************************')
-    console.log('******g_queueName******',g_queueName)
-    console.log('************************')
-    console.log('************************')
 
     try {
         var result  = await readConfig(g_dbTableName);
-        g_config = result.urls
-        
+        g_config = result.urls  
 
         var indexFound = getConfigIndexToProcess();
         while(indexFound) {

@@ -1,6 +1,6 @@
 {
   "name": "@jasongilbertuk/scraper",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/jason-gilbert-uk/scraper#readme",
   "dependencies": {
+    "@jasongilbertuk/control-table": "^1.0.1",
     "@jasongilbertuk/demo25lib": "^1.0.12",
     "@jasongilbertuk/dynamo-helper": "^1.0.1",
     "@jasongilbertuk/s3-helper": "^1.0.0",
