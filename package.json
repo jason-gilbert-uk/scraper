@@ -1,6 +1,6 @@
 {
   "name": "@jasongilbertuk/scraper",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -21,7 +21,7 @@
     "@jasongilbertuk/demo25lib": "^1.0.12",
     "@jasongilbertuk/dynamo-helper": "^1.0.1",
     "@jasongilbertuk/s3-helper": "^1.0.0",
-    "@jasongilbertuk/sqs-helper": "^1.0.4",
+    "@jasongilbertuk/sqs-helper": "^1.0.5",
     "axios": "^0.26.0",
     "cheerio": "^1.0.0-rc.10"
   }
