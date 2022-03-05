@@ -210,7 +210,9 @@ async function processNextEntry() {
                 "productPromotionDate": ProductPromotionDate,
                 "productPromotionStart": ProductPromotionStart,
                 "productPromotionEnd" : ProductPromotionEnd,
-                "clubcardPrice": clubcardPrice};
+                "clubcardPrice": clubcardPrice,
+                "effectivePercentReduction": effectivePercentageReduction 
+            };
             articles.push(article);
             //console.log(JSON.stringify(article)+",");
             
