@@ -184,6 +184,12 @@ async function processNextEntry() {
                 showDeal = false;
             }
 
+            //calculate effective discount %
+            var effectivePercentageReduction = ((1.00 - (parseFloat(clubcardPrice) / parseFloat(price))).toFixed(2))*100;
+            console.log('clubcard price = ',clubcardPrice)
+            console.log('price = ',price);
+            console.log('effective % reduction = ',effectivePercentageReduction)
+
             if (ProductPromotionDate != '') {
                 ProductPromotionStart = ProductPromotionDate.slice(30,40);
                 ProductPromotionEnd = ProductPromotionDate.slice(46,57);
