@@ -154,18 +154,10 @@ async function processNextEntry() {
                                     clubcardPrice = price;
                                 } else if (temp==4) {
                                     promotionType = PROMOTION_TYPE.CLUBCARD_PRICE;
-                                    console.log('temp=4')
-                                    console.log(ProductPromotionText)
-                                    console.log(ProductPromotionText.slice(0,2))
                                     clubcardPrice = parseFloat("0."+ ProductPromotionText.slice(0,2)).toFixed(2);
-                                    console.log(clubcardPrice)
                                 }else {
                                     promotionType = PROMOTION_TYPE.CLUBCARD_PRICE;
-                                    console.log('else')
-                                    console.log(ProductPromotionText)
-                                    console.log(ProductPromotionText.slice(0,2))
                                     clubcardPrice = parseFloat(ProductPromotionText.slice(1,temp-1)).toFixed(2);
-                                    console.log(clubcardPrice);
                                 }
                             }
                             else {
@@ -205,25 +197,16 @@ async function processNextEntry() {
                 showDeal = false;
             }
 
-            if (clubcardPrice === 'NaN') {
-                console.log(clubcardPrice);
-                throw "Error";
-            }
-
             //calculate effective discount %
             var effectivePercentageReduction = ((1.00 - (parseFloat(clubcardPrice) / parseFloat(price))).toFixed(2))*100;
-            console.log('clubcard price = ',clubcardPrice)
-            console.log('price = ',price);
-            console.log('effective % reduction = ',effectivePercentageReduction)
-
+            
             if (ProductPromotionDate != '') {
                 ProductPromotionStart = ProductPromotionDate.slice(30,40);
                 ProductPromotionEnd = ProductPromotionDate.slice(46,57);
                 //Offer valid for delivery from 03/01/2022 until 08/02/2022
             }
 
-            console.log(clubC)
-
+            
             var article = {
                 "productId": productId,
                 "title": title,
@@ -242,7 +225,6 @@ async function processNextEntry() {
                 "effectivePercentReduction": effectivePercentageReduction 
             };
             articles.push(article);
-            //console.log(JSON.stringify(article)+",");
             
         })
       
