@@ -1,5 +1,5 @@
 const {writeObjectToS3,generateDateTimeFileName} = require('@jasongilbertuk/s3-helper')
-const {readConfig,writeItemToControlTable} = require('@jasongilbertuk/control-table')
+const {readConfigFromControlTable,writeItemToControlTable} = require('@jasongilbertuk/control-table')
 const {writeObjectToSQS} = require('@jasongilbertuk/sqs-helper')
 
 
@@ -238,7 +238,7 @@ async function scraper(dbTableName,bucketName,queueName) {
     g_queueName = await createSQSIfDoesntExist(queueName);
 
     try {
-        var result  = await readConfig(g_dbTableName);
+        var result  = await readConfigFromControlTable(g_dbTableName);
         g_config = result.urls  
 
         var indexFound = getConfigIndexToProcess();
