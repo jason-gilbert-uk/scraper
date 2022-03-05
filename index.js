@@ -192,6 +192,11 @@ async function processNextEntry() {
                 showDeal = false;
             }
 
+            if (clubcardPrice === 'NaN') {
+                console.log(clubcardPrice);
+                throw "Error";
+            }
+
             //calculate effective discount %
             var effectivePercentageReduction = ((1.00 - (parseFloat(clubcardPrice) / parseFloat(price))).toFixed(2))*100;
             console.log('clubcard price = ',clubcardPrice)
