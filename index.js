@@ -172,9 +172,14 @@ async function processNextEntry() {
                             }
                         } else {
                             promotionType = PROMOTION_TYPE.ANY_X_FOR_Y;
+                            //Any 10 for £6.50 Clubcard Price - Selected Heinz Or Hipp Baby Food 160g - 200g
                             clubcardPrice = price;
                             temp = ProductPromotionText.indexOf("Clubcard Price");
-                            purchaseNumber = ProductPromotionText.substring(4,5);
+                            var countStart = 4;
+                            var countEnd = ProductPromotionText.indexOf("£"); 
+                            purchaseNumber = ProductPromotionText.substring(countStart,countEnd-2);
+                            console.log(ProductPromotionText);
+                            console.log('purchase number = ',purchaseNumber)
                             purchasePrice = ProductPromotionText.slice(11,temp-1);
                             clubcardPrice = (parseFloat(purchasePrice) / parseFloat(purchaseNumber)).toFixed(2);
                         }
