@@ -176,8 +176,8 @@ async function processNextEntry() {
                             clubcardPrice = price;
                             temp = ProductPromotionText.indexOf("Clubcard Price");
                             var countStart = 4;
-                            var countEnd = ProductPromotionText.indexOf("£"); 
-                            purchaseNumber = ProductPromotionText.substring(countStart,countEnd-2);
+                            var countEnd = ProductPromotionText.indexOf("for"); 
+                            purchaseNumber = ProductPromotionText.substring(countStart,countEnd);
                             console.log(ProductPromotionText);
                             console.log('purchase number = ',purchaseNumber)
                             purchasePrice = ProductPromotionText.slice(11,temp-1);
