@@ -137,9 +137,7 @@ async function processNextEntry() {
             ProductPromotionText = ProductPromotionText.slice(0,ProductPromotionText.length/2);
             ProductPromotionDate = ProductPromotionDate.slice(0,ProductPromotionDate.length/2);
             var showDeal = true;
-            //TODO - Remove
-            ProductPromotionText ="Buy 2 or more Save 25% Clubcard Price"
-
+           
             var temp = ProductPromotionText.indexOf("%");
             if (temp == -1) {
                 var temp = ProductPromotionText.indexOf("Cheapest Product Free");
@@ -177,6 +175,7 @@ async function processNextEntry() {
 
                                 }
                             } else {
+                                //Any 10 for £6.50 Clubcard Price - Selected Heinz Or Hipp Baby Food 160g - 200g
                                 promotionType = PROMOTION_TYPE.ANY_X_FOR_Y;
                                 clubcardPrice = price;
                                 temp = ProductPromotionText.indexOf("Clubcard Price");
@@ -191,7 +190,7 @@ async function processNextEntry() {
                                 var priceEnd = sub.indexOf(" ");
                                 var final = sub.slice(0,priceEnd);
                                 console.log('final = ',final)
-                                purchasePrice = ProductPromotionText.slice(11,temp-1);
+                                purchasePrice = final
                                 console.log("purchasePrice=",purchasePrice)
                                 clubcardPrice = (parseFloat(purchasePrice) / parseFloat(purchaseNumber)).toFixed(2);
                             }
@@ -225,10 +224,11 @@ async function processNextEntry() {
                 console.log('purchase number = ',purchaseNumber)
                 var percentStart = ProductPromotionText.indexOf("Save");
                 var percentEnd = ProductPromotionText.indexOf("%")
-                var sub = ProductPromotionText.slice(priceStart+5,percentEnd-1);
-                console.log('sub=',sub)
-                //console.log("purchasePrice=",purchasePrice)
-                //clubcardPrice = (parseFloat(purchasePrice) / parseFloat(purchaseNumber)).toFixed(2);
+                var percent = ProductPromotionText.slice(percentStart+5,percentEnd);
+                console.log('percent=',percent)
+                console.log('purchasePrice ',(parseFloat(price)))
+                clubcardPrice = (parseFloat(price) * ((100.0 - parseFloat(percent))/100.0)).toFixed(2);
+                console.log(clubcardPrice);
             }
 
             //calculate effective discount %
