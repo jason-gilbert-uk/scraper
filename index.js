@@ -86,6 +86,11 @@ async function processNextEntry() {
             var productId = url.substr(url.lastIndexOf('/') + 1);
             var imageUrl
             var price =  parseFloat("0.00").toFixed(2);
+            if (price === 'NaN') {
+                console.log(url)
+                console.log('price is not a number')
+                throw "Price is not a number"
+            }
             var AldiPriceMatch = false;
             var hasPromotion = false;
             var ProductPromotionText = ''
@@ -182,16 +187,11 @@ async function processNextEntry() {
                                 var countStart = 4;
                                 var countEnd = ProductPromotionText.indexOf("for"); 
                                 purchaseNumber = ProductPromotionText.substring(countStart,countEnd);
-                                console.log(ProductPromotionText);
-                                console.log('purchase number = ',purchaseNumber)
                                 var priceStart = ProductPromotionText.indexOf("£");
                                 var sub = ProductPromotionText.slice(priceStart+1,ProductPromotionText.length);
-                                console.log('sub=',sub)
                                 var priceEnd = sub.indexOf(" ");
                                 var final = sub.slice(0,priceEnd);
-                                console.log('final = ',final)
                                 purchasePrice = final
-                                console.log("purchasePrice=",purchasePrice)
                                 clubcardPrice = (parseFloat(purchasePrice) / parseFloat(purchaseNumber)).toFixed(2);
                             }
                         } else {
