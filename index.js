@@ -14,7 +14,8 @@ const PROMOTION_TYPE = {
     ANY_X_FOR_Y: "Any x for y",
     PER_KG: "Per Kg",
     CHEAPEST_FREE: "Cheapest Free",
-    CLUBCARD_PRICE: "Clubcard Price"
+    CLUBCARD_PRICE: "Clubcard Price",
+    MULTIBUY_PERCENT: "Buy x save y%"
 }
 
 function getConfigIndexToProcess() {
@@ -136,70 +137,98 @@ async function processNextEntry() {
             ProductPromotionText = ProductPromotionText.slice(0,ProductPromotionText.length/2);
             ProductPromotionDate = ProductPromotionDate.slice(0,ProductPromotionDate.length/2);
             var showDeal = true;
-            var temp = ProductPromotionText.indexOf("Cheapest Product Free");
-            if (temp == -1)
-            {
-                temp = ProductPromotionText.indexOf("per kg Clubcard Price")
-                if (temp == -1) {
-                    temp = ProductPromotionText.indexOf("Meal Deal");
-                    if (temp == -1){
-                        temp = ProductPromotionText.indexOf("Any ");
-                        if (temp == -1)
-                        {
-                            temp = ProductPromotionText.indexOf(" for");
-                            if (temp == -1 ) {
-                                temp = ProductPromotionText.indexOf("Clubcard Price");
-                                if (temp == -1) {
-                                    promotionType = PROMOTION_TYPE.NONE;
-                                    clubcardPrice = price;
-                                } else if (temp==4) {
-                                    promotionType = PROMOTION_TYPE.CLUBCARD_PRICE;
-                                    clubcardPrice = parseFloat("0."+ ProductPromotionText.slice(0,2)).toFixed(2);
-                                }else {
-                                    promotionType = PROMOTION_TYPE.CLUBCARD_PRICE;
-                                    clubcardPrice = parseFloat(ProductPromotionText.slice(1,temp-1)).toFixed(2);
+            //TODO - Remove
+            ProductPromotionText ="Buy 2 or more Save 25% Clubcard Price"
+
+            var temp = ProductPromotionText.indexOf("%");
+            if (temp == -1) {
+                var temp = ProductPromotionText.indexOf("Cheapest Product Free");
+                if (temp == -1)
+                {
+                    temp = ProductPromotionText.indexOf("per kg Clubcard Price")
+                    if (temp == -1) {
+                        temp = ProductPromotionText.indexOf("Meal Deal");
+                        if (temp == -1){
+                            temp = ProductPromotionText.indexOf("Any ");
+                            if (temp == -1)
+                            {
+                                temp = ProductPromotionText.indexOf(" for");
+                                if (temp == -1 ) {
+                                    temp = ProductPromotionText.indexOf("Clubcard Price");
+                                    if (temp == -1) {
+                                        promotionType = PROMOTION_TYPE.NONE;
+                                        clubcardPrice = price;
+                                    } else if (temp==4) {
+                                        promotionType = PROMOTION_TYPE.CLUBCARD_PRICE;
+                                        clubcardPrice = parseFloat("0."+ ProductPromotionText.slice(0,2)).toFixed(2);
+                                    }else {
+                                        promotionType = PROMOTION_TYPE.CLUBCARD_PRICE;
+                                        clubcardPrice = parseFloat(ProductPromotionText.slice(1,temp-1)).toFixed(2);
+                                    }
                                 }
-                            }
-                            else {
-                                //3 for 2 without 'any'
+                                else {
+                                    //3 for 2 without 'any'
+                                    promotionType = PROMOTION_TYPE.ANY_X_FOR_Y;
+                                    clubcardPrice = price;
+                                    temp = ProductPromotionText.indexOf("Clubcard Price");
+                                    purchaseNumber = ProductPromotionText.substring(0,1);
+                                    purchasePrice = ProductPromotionText.slice(7,temp-1);
+                                    clubcardPrice = (parseFloat(purchasePrice) / parseFloat(purchaseNumber)).toFixed(2);
+
+                                }
+                            } else {
                                 promotionType = PROMOTION_TYPE.ANY_X_FOR_Y;
                                 clubcardPrice = price;
                                 temp = ProductPromotionText.indexOf("Clubcard Price");
-                                purchaseNumber = ProductPromotionText.substring(0,1);
-                                purchasePrice = ProductPromotionText.slice(7,temp-1);
+                                var countStart = 4;
+                                var countEnd = ProductPromotionText.indexOf("for"); 
+                                purchaseNumber = ProductPromotionText.substring(countStart,countEnd);
+                                console.log(ProductPromotionText);
+                                console.log('purchase number = ',purchaseNumber)
+                                var priceStart = ProductPromotionText.indexOf("£");
+                                var sub = ProductPromotionText.slice(priceStart+1,ProductPromotionText.length);
+                                console.log('sub=',sub)
+                                var priceEnd = sub.indexOf(" ");
+                                var final = sub.slice(0,priceEnd);
+                                console.log('final = ',final)
+                                purchasePrice = ProductPromotionText.slice(11,temp-1);
+                                console.log("purchasePrice=",purchasePrice)
                                 clubcardPrice = (parseFloat(purchasePrice) / parseFloat(purchaseNumber)).toFixed(2);
-
                             }
                         } else {
-                            promotionType = PROMOTION_TYPE.ANY_X_FOR_Y;
-                            //Any 10 for £6.50 Clubcard Price - Selected Heinz Or Hipp Baby Food 160g - 200g
+                            promotionType = PROMOTION_TYPE.MEAL_DEAL
                             clubcardPrice = price;
-                            temp = ProductPromotionText.indexOf("Clubcard Price");
-                            var countStart = 4;
-                            var countEnd = ProductPromotionText.indexOf("for"); 
-                            purchaseNumber = ProductPromotionText.substring(countStart,countEnd);
-                            console.log(ProductPromotionText);
-                            console.log('purchase number = ',purchaseNumber)
-                            purchasePrice = ProductPromotionText.slice(11,temp-1);
-                            clubcardPrice = (parseFloat(purchasePrice) / parseFloat(purchaseNumber)).toFixed(2);
+                            showDeal = false;
                         }
-                    } else {
-                        promotionType = PROMOTION_TYPE.MEAL_DEAL
+                    }
+                    else
+                    {
+                        promotionType = PROMOTION_TYPE.PER_KG;
                         clubcardPrice = price;
                         showDeal = false;
                     }
-                }
-                else
-                {
-                    promotionType = PROMOTION_TYPE.PER_KG;
+                } else {
+                    //Todo Any 3 for 2 Clubcard Price - Cheapest Product Free - Selected Vegetables 80g - 800g
+                    promotionType = PROMOTION_TYPE.CHEAPEST_FREE;
                     clubcardPrice = price;
                     showDeal = false;
                 }
             } else {
-                //Todo Any 3 for 2 Clubcard Price - Cheapest Product Free - Selected Vegetables 80g - 800g
-                promotionType = PROMOTION_TYPE.CHEAPEST_FREE;
+                //Buy 2 or more Save 25% Clubcard Price'
+                promotionType = PROMOTION_TYPE.MULTIBUY_PERCENT;
                 clubcardPrice = price;
-                showDeal = false;
+                temp = ProductPromotionText.indexOf("Clubcard Price");
+                var countStart = 4;
+                var countEnd = ProductPromotionText.indexOf("or"); 
+                purchaseNumber = ProductPromotionText.substring(countStart,countEnd);
+                console.log(ProductPromotionText);
+                console.log('purchase number = ',purchaseNumber)
+                var percentStart = ProductPromotionText.indexOf("Save");
+                var percentEnd = ProductPromotionText.indexOf("%")
+                var sub = ProductPromotionText.slice(priceStart+5,percentEnd-1);
+                console.log('sub=',sub)
+                //console.log("purchasePrice=",purchasePrice)
+                //clubcardPrice = (parseFloat(purchasePrice) / parseFloat(purchaseNumber)).toFixed(2);
             }
 
             //calculate effective discount %
