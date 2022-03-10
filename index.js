@@ -330,7 +330,7 @@ async function processNextEntry() {
             var ProductPromotionDate = ''
             var ProductPromotionStart = ''
             var ProductPromotionEnd = ''
-            var promotionType = promotionType.NONE;
+            var typeOfPromition = promotionType.NO_OFFER;
 
             const imageBlock = $(this).find('.product-image__container')
             imageUrl = $(imageBlock.find('img')).attr('src');
@@ -350,13 +350,12 @@ async function processNextEntry() {
                     "productPromotionDate": ProductPromotionDate,
                     "productPromotionStart": ProductPromotionStart,
                     "productPromotionEnd" : ProductPromotionEnd,
+                    "promotionType": typeOfPromition,
                     "quantityToAchieveDiscount" : 1,
                     "pecentageDiscount": 0,
                     "discountedPrice" : price
                 }
-                    const totalPrice = parseInt(words[2]);
-                    product.discountedPrice = totalPrice/product.quantityToAchieveDiscount;
-                    product.percentageDiscount = (1.00-((product.discountedPrice/parseFloat(product.price))));;
+
                 articles.push(article);
                 return true;            //skip to next item in each itteration.
             } 
