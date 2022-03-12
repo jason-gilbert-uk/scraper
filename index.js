@@ -362,8 +362,7 @@ async function processNextEntry() {
 
             const priceEntry = $(this).find('.price-per-sellable-unit--price')
             const textprice = $(priceEntry).find('.value').text()
-            price = parseFloat(textprice).toFixed(2);
-            clubcardPrice = price;
+            price = parseFloat(textprice);
             const ProductInfoMessages= $(this).find('.product-info-message-list');
             const ProductInfoMessage =$(ProductInfoMessages).find('.product-info-message');
             const AldiPriceMatchMessage = $(ProductInfoMessage).find('p').text();
