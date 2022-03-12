@@ -143,7 +143,7 @@ function processClubcardPriceOffer(product){
         console.log(words)
     }
     const x = parseFloat(words[0]);
-    product.percentageDiscount = (1.00-((parseFloat(words[0]/parseFloat(product.price)))));
+    product.percentageDiscount = ((1.00-((parseFloat(words[0]/parseFloat(product.price)))))*100);
     product.quantityToAchieveDiscount = 1;
     product.discountedPrice = parseFloat(words[0]);
 
