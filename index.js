@@ -311,6 +311,9 @@ async function processNextEntry() {
     try {
         const html = response.data;
         const $ = cheerio.load(html)
+        const date = new Date();
+        const formattedDate = date.toLocaleDateString('en-GB').split('/').reverse().join(''); // '20211124'
+        
         $('.product-list--list-item',html).each(function(){
             var isAvailable = true;
             var title = $(this).find('h3').text()
@@ -340,6 +343,7 @@ async function processNextEntry() {
                 isAvailable = false;
                 var article = {
                     "productId": productId,
+                    "lastUpdatedDate" : formattedDate,
                     "title": title,
                     "url" : url,
                     "imageUrl" : imageUrl,
@@ -383,6 +387,7 @@ async function processNextEntry() {
 
             var article = {
                 "productId": productId,
+                "lastUpdatedDate" : formattedDate,
                 "title": title,
                 "url" : url,
                 "imageUrl" : imageUrl,
