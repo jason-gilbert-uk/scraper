@@ -23,7 +23,6 @@ const promotionType = {
 }
 
 function logDetails(product) {
-    //console.log(product);
     console.log('promotion: ',product.productPromotionText);
     console.log('promition type: ',product.promotionType);
     console.log('quantity to achieve discount: ',product.quantityToAchieveDiscount); 
@@ -80,7 +79,7 @@ function processAnyXforYOffer(product) {
         console.log(words)
     }
     product.quantityToAchieveDiscount = parseInt(words[1]);
-    totalCost = parseInt(words[3]);
+    totalCost = parseFloat(words[3]);
     product.percentageDiscount = ((1.00-((totalCost/product.quantityToAchieveDiscount)/product.price))*100);
     product.discountedPrice = product.price*((100-product.percentageDiscount)/100)
 }
@@ -102,7 +101,7 @@ function processXforYOffer(product) {
         console.log(words)
     }
     product.quantityToAchieveDiscount = parseInt(words[0]);
-    const totalPrice = parseInt(words[2]);
+    const totalPrice = parseFloat(words[2]);
     product.discountedPrice = totalPrice/product.quantityToAchieveDiscount;
     product.percentageDiscount = (1.00-((product.discountedPrice/parseFloat(product.price))));
 }
@@ -277,7 +276,6 @@ function getConfigIndexToProcess() {
     return indexFound;
 }
 function sleepWithDelay(delay) {
-    console.log('*** sleeping for a period of ',delay," milliseconds")
     var start = new Date().getTime();
     while (new Date().getTime() < start + delay);
 }
@@ -296,7 +294,6 @@ async function processNextEntry() {
         url = g_config[g_indexToProcess].nextInChain;
     }
     randomSleep(500,1000);
-    console.log('*** timer complete processing request for url ',url)
     try {
         console.log('axios about to be called. url = ',url)
         var response = await axios.get(url);
@@ -321,7 +318,13 @@ async function processNextEntry() {
             var url = "https://www.tesco.com" + urlsub;
             var productId = url.substr(url.lastIndexOf('/') + 1);
             var imageUrl
-            var price =  parseFloat("0.00");
+
+            var priceFind = $(this).find('.beans-price__text').text();
+            if (priceFind == null) {
+                console.log('null')
+            }
+           
+            var price =  parseFloat(priceFind.substring(1));
             if (price === 'NaN') {
                 console.log(url)
                 console.log('price is not a number')
@@ -364,9 +367,9 @@ async function processNextEntry() {
                 return true;            //skip to next item in each itteration.
             } 
 
-            const priceEntry = $(this).find('.price-per-sellable-unit--price')
-            const textprice = $(priceEntry).find('.value').text()
-            price = parseFloat(textprice);
+            //const priceEntry = $(this).find('.price-per-sellable-unit--price')
+            //const textprice = $(priceEntry).find('.value').text()
+            //price = parseFloat(textprice);
             const ProductInfoMessages= $(this).find('.product-info-message-list');
             const ProductInfoMessage =$(ProductInfoMessages).find('.product-info-message');
             const AldiPriceMatchMessage = $(ProductInfoMessage).find('p').text();
@@ -435,7 +438,6 @@ async function scraper(dbTableName,bucketName,queueName) {
         var indexFound = getConfigIndexToProcess();
         while(indexFound) {
             while (articles.length < 500) {
-                console.log('articles.length = ',articles.length)
                 await processNextEntry()
                 indexFound = getConfigIndexToProcess();
             }
