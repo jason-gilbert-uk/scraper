@@ -370,12 +370,13 @@ async function processNextEntry() {
             //const priceEntry = $(this).find('.price-per-sellable-unit--price')
             //const textprice = $(priceEntry).find('.value').text()
             //price = parseFloat(textprice);
-            const ProductInfoMessages= $(this).find('.product-info-message-list');
-            const ProductInfoMessage =$(ProductInfoMessages).find('.product-info-message');
+            const ProductInfoMessages= $(this).find('.product-info-message-section');
+            const ProductInfoMessage =$(ProductInfoMessages).find('.product-info-message-list');
             const AldiPriceMatchMessage = $(ProductInfoMessage).find('p').text();
-            if (AldiPriceMatchMessage === "Aldi Price MatchAldi Price Match") {
+            if (AldiPriceMatchMessage === "Aldi Price Match") {
                 AldiPriceMatch = true;
             }
+
             ProductPromotionText = $(this).find('.offer-text').text();
             ProductPromotionDate = $(this).find('.dates').text();
             ProductPromotionText = ProductPromotionText.slice(0,ProductPromotionText.length/2);
@@ -437,7 +438,7 @@ async function scraper(dbTableName,bucketName,queueName) {
 
         var indexFound = getConfigIndexToProcess();
         while(indexFound) {
-            while (articles.length < 500) {
+            while (articles.length < 100000 && indexFound) {
                 await processNextEntry()
                 indexFound = getConfigIndexToProcess();
             }
@@ -448,6 +449,7 @@ async function scraper(dbTableName,bucketName,queueName) {
             writeObjectToSQS(g_queueName,sqsMsg);
 
             indexFound = getConfigIndexToProcess();
+            console.log(articles.length)
             articles=[];
         }
 
